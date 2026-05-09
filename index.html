@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCMT — Mokx's Character Management Tool</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--gold:#d4a843;--gold-light:#f0d68a;--gold-dark:#a07c2e;--bg:#0e0e12;--bg-card:#1a1a24;--bg-card-hover:#22222f;--text:#e8e4dc;--text-muted:#9e9a90;--border:rgba(212,168,67,.15);--glow:rgba(212,168,67,.25)}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* subtle parchment noise via SVG data URI */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.03;background:url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");z-index:9999}
+
+a{color:var(--gold);text-decoration:none}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;background:rgba(14,14,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+nav .logo{font-size:1.25rem;font-weight:700;letter-spacing:.05em;color:var(--gold)}
+nav .logo span{color:var(--text-muted);font-weight:400;font-size:.85rem;margin-left:.5rem}
+nav a.dl{padding:.5rem 1.2rem;border:1px solid var(--gold);border-radius:6px;font-size:.85rem;font-weight:600;transition:.2s}
+nav a.dl:hover{background:var(--gold);color:var(--bg)}
+
+/* ─── HERO ─── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;position:relative}
+.hero::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40%;background:linear-gradient(to top,var(--bg),transparent);pointer-events:none}
+.hero-icon{font-size:4.5rem;margin-bottom:1rem;filter:drop-shadow(0 0 30px var(--glow))}
+.hero h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--gold-dark));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .subtitle{font-size:clamp(1rem,2.5vw,1.35rem);color:var(--text-muted);max-width:600px;margin:1rem auto 0}
+.hero .tagline{font-size:.95rem;color:var(--text-muted);margin-top:.5rem;font-style:italic}
+
+.cta-row{display:flex;gap:1rem;margin-top:2.5rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.9rem 2rem;border-radius:8px;font-size:1rem;font-weight:700;transition:.25s;cursor:pointer;border:none}
+.btn-primary{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--bg);box-shadow:0 4px 25px var(--glow)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 35px var(--glow)}
+.btn-secondary{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn-secondary:hover{background:rgba(212,168,67,.1)}
+
+/* ─── STATS BAR ─── */
+.stats{display:flex;justify-content:center;flex-wrap:wrap;gap:2rem 3rem;padding:3rem 2rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.stat{text-align:center}
+.stat .num{font-size:2rem;font-weight:800;color:var(--gold)}
+.stat .label{font-size:.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-top:.15rem}
+
+/* ─── SECTIONS ─── */
+section{padding:5rem 2rem}
+.section-title{text-align:center;font-size:clamp(1.75rem,4vw,2.5rem);font-weight:800;margin-bottom:.5rem}
+.section-sub{text-align:center;color:var(--text-muted);max-width:550px;margin:0 auto 3rem}
+
+/* ─── FEATURES GRID ─── */
+.features{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;max-width:1100px;margin:0 auto}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.75rem;transition:.3s}
+.card:hover{background:var(--bg-card-hover);border-color:rgba(212,168,67,.3);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.card .icon{font-size:2rem;margin-bottom:.75rem}
+.card h3{font-size:1.1rem;font-weight:700;margin-bottom:.4rem;color:var(--gold-light)}
+.card p{font-size:.9rem;color:var(--text-muted);line-height:1.55}
+
+/* ─── SCREENSHOT MOCKUP ─── */
+.mockup-section{text-align:center;padding:4rem 2rem}
+.phone-frame{display:inline-block;width:260px;height:460px;border-radius:28px;border:3px solid var(--gold-dark);background:var(--bg-card);position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.phone-frame .screen{position:absolute;inset:8px;border-radius:22px;background:linear-gradient(160deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;font-size:.8rem;color:var(--text-muted)}
+.phone-frame .screen .app-name{font-size:1.1rem;font-weight:700;color:var(--gold)}
+
+/* ─── CTA BANNER ─── */
+.cta-banner{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,rgba(212,168,67,.06),rgba(14,14,18,0))}
+.cta-banner h2{font-size:clamp(1.5rem,4vw,2.25rem);font-weight:800;margin-bottom:.75rem}
+.cta-banner p{color:var(--text-muted);margin-bottom:2rem}
+
+/* ─── FOOTER ─── */
+footer{text-align:center;padding:2.5rem 2rem;border-top:1px solid var(--border);font-size:.8rem;color:var(--text-muted)}
+footer .disclaimer{max-width:600px;margin:0 auto;line-height:1.6}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:600px){
+  nav{padding:.75rem 1rem}
+  .hero{padding:7rem 1.25rem 3rem}
+  section{padding:3.5rem 1.25rem}
+  .stats{gap:1.5rem 2rem}
+  .stat .num{font-size:1.5rem}
+  .features{grid-template-columns:1fr}
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.hero h1,.hero .subtitle,.hero .tagline,.cta-row{animation:fadeUp .8s ease both}
+.hero .subtitle{animation-delay:.15s}
+.hero .tagline{animation-delay:.25s}
+.cta-row{animation-delay:.35s}
+
+.card{opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s,background .3s,border-color .3s,box-shadow .3s}
+.card.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">MCMT <span>Character Manager</span></div>
+  <a href="./mcmt-latest.apk" class="dl">⬇ Download APK</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-icon">⚔️</div>
+  <h1>MCMT</h1>
+  <p class="subtitle">Mokx's Character Management Tool — the ultimate D&amp;D 5e character sheet for Android.</p>
+  <p class="tagline">2014 rules. Offline. Free. No strings attached.</p>
+  <div class="cta-row">
+    <a href="./mcmt-latest.apk" class="btn btn-primary">⬇ Download APK</a>
+    <a href="#features" class="btn btn-secondary">See Features</a>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="num">546</div><div class="label">Spells</div></div>
+  <div class="stat"><div class="num">472</div><div class="label">Races</div></div>
+  <div class="stat"><div class="num">145</div><div class="label">Subclasses</div></div>
+  <div class="stat"><div class="num">13</div><div class="label">Classes</div></div>
+  <div class="stat"><div class="num">141</div><div class="label">Backgrounds</div></div>
+  <div class="stat"><div class="num">188</div><div class="label">Feats</div></div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <h2 class="section-title">Everything You Need to Roll</h2>
+  <p class="section-sub">A full-featured character sheet that works entirely on your device — no accounts, no internet required.</p>
+  <div class="features">
+
+    <div class="card"><div class="icon">📜</div><h3>Massive Content Library</h3><p>546 spells, 472 races, 145 subclasses, 141 backgrounds, and 188 feats — all baked in and ready to use.</p></div>
+
+    <div class="card"><div class="icon">⚔️</div><h3>Multiclass &amp; Level-Up</h3><p>Full multiclass support with automatic feature tracking as you level. Pick your path, MCMT handles the bookkeeping.</p></div>
+
+    <div class="card"><div class="icon">✨</div><h3>Spell Slot Tracking</h3><p>Cast buttons per spell slot level, ritual casting system, and automatic slot management. Never lose count again.</p></div>
+
+    <div class="card"><div class="icon">🖼️</div><h3>Portraits &amp; Class Art</h3><p>Upload a custom portrait for your character and enjoy built-in class artwork to bring your sheet to life.</p></div>
+
+    <div class="card"><div class="icon">📄</div><h3>PDF Import</h3><p>Already have a filled-out PDF character sheet? Import it directly and MCMT will parse your stats.</p></div>
+
+    <div class="card"><div class="icon">🌗</div><h3>Dark Mode Toggle</h3><p>Switch between light and dark themes. Perfect for late-night sessions or brightly lit game stores.</p></div>
+
+    <div class="card"><div class="icon">📊</div><h3>3-Column Layout</h3><p>A responsive three-column design puts abilities, combat, and spells all in view — adapts beautifully to any screen.</p></div>
+
+    <div class="card"><div class="icon">💀</div><h3>Death Saves &amp; Temp HP</h3><p>Track death saving throws and temporary hit points right on your sheet. Stay alive — or at least try.</p></div>
+
+    <div class="card"><div class="icon">💰</div><h3>Currency Converter</h3><p>Instantly convert between CP, SP, EP, GP, and PP. Split loot fairly without the mental math.</p></div>
+
+    <div class="card"><div class="icon">📡</div><h3>Fully Offline</h3><p>No internet needed. No account required. Everything is saved locally on your device via localStorage.</p></div>
+
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2>Ready to Roll?</h2>
+  <p>Download the APK, sideload it on your Android device, and start building characters in minutes.</p>
+  <a href="./mcmt-latest.apk" class="btn btn-primary">⬇ Download MCMT</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="disclaimer">
+    <strong>MCMT</strong> is a fan-made project and is not affiliated with, endorsed by, or associated with Wizards of the Coast, Hasbro, or the Dungeons &amp; Dragons brand. All game content and materials referenced are the property of their respective owners.<br><br>
+    Made with ❤️ by Mokx
+  </div>
+</footer>
+
+<script>
+// Intersection observer for card animations
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.card').forEach(c => obs.observe(c));
+</script>
+</body>
+</html>
