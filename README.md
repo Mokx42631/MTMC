@@ -4,7 +4,14 @@ A comprehensive **D&D 5e (2014)** character sheet manager for Android.
 
 ## 📥 Download
 
-**[Download APK](https://mokx42631.github.io/MTMC/mcmt-latest.apk)** · [Visit Site](https://mokx42631.github.io/MTMC/)
+| Version | Link |
+|---------|------|
+| ☀️ **Light Mode** | [Download APK](https://mokx42631.github.io/MTMC/mcmt-latest.apk) |
+| 🌙 **Dark Mode** | [Download APK](https://mokx42631.github.io/MTMC/mcmt-dark.apk) |
+
+🌐 [Visit Site](https://mokx42631.github.io/MTMC/)
+
+> **Note:** Light and Dark APKs use different signing keys. Uninstall one before installing the other.
 
 ## ✨ Features
 
@@ -22,7 +29,7 @@ A comprehensive **D&D 5e (2014)** character sheet manager for Android.
 
 ## 📱 Installation
 
-1. Download the APK from the link above
+1. Download the APK (Light or Dark) from the links above
 2. On your Android device, enable **Install from unknown sources** if prompted
 3. Open the APK and install
 4. That's it — no account needed, no internet required
